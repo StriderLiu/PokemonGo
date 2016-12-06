@@ -1,0 +1,25 @@
+@(res: Future[String])
+
+@import helper._
+@import scala.concurrent.Future
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+  <p>
+    @res onSuccess {
+      case type => type
+    }
+  </p>
+
+  @form(routes.PokeController.index) {
+    <div class="buttons">
+      <input type="submit" value="Return to Main"/>
+    </div>
+  }
+</body>
+</html>

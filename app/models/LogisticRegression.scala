@@ -1,22 +1,21 @@
-package services
+package models
 
 import org.apache.spark.SparkContext
-import org.apache.spark.mllib.tree.model.DecisionTreeModel
-import org.apache.spark.mllib.tree.DecisionTree
-import org.apache.spark.mllib.feature.StandardScaler
+import org.apache.spark.mllib.classification.{LogisticRegressionModel, LogisticRegressionWithLBFGS}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
-import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.feature.StandardScaler
 import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.mllib.regression.LabeledPoint
 
 /**
   * Created by vincentliu on 05/12/2016.
   */
-object decisionTree extends mlAlgorithms[DecisionTreeModel]{
+class LogisticRegression extends ModelGenerator[LogisticRegressionModel]{
 
   def getModel(sc: SparkContext, file: String) = {
     // if the model already exists, then retrieve the model from directory
     // if the model does not exist, then train the data set and get a model
-    val modelOption = Option(DecisionTreeModel.load(sc, "target/tmp/DecisionTreeModel"))
+    val modelOption = Option(LogisticRegressionModel.load(sc, "target/tmp/LogisticRegressionModel"))
 
     modelOption match {
       case Some(model) => model
@@ -43,33 +42,25 @@ object decisionTree extends mlAlgorithms[DecisionTreeModel]{
     val splits = normalizedData.randomSplit(Array(0.7, 0.3), seed = 11L)
     val (training, test) = (splits(0), splits(1))
 
-    // Train a DecisionTree model.
-    //  Empty categoricalFeaturesInfo indicates all features are continuous.
-    val numClasses = 15
-    val categoricalFeaturesInfo = Map[Int, Int]()
-    val impurity = "gini"
-    val maxDepth = 15
-    val maxBins = 32
+    // Logistic Regression
+    // Run training algorithm to build the model
+    lazy val model = new LogisticRegressionWithLBFGS()
+      .setNumClasses(15)
+      .run(training)
 
-    lazy val model = DecisionTree.trainClassifier(training, numClasses, categoricalFeaturesInfo, impurity, maxDepth, maxBins)
-
-    // Evaluate model on test instances and compute test error
-    lazy val labelAndPreds = test.map { point =>
-      val prediction = model.predict(point.features)
-      (point.label, prediction)
+    // Compute raw scores on the test set.
+    lazy val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
+      val prediction = model.predict(features)
+      (prediction, label)
     }
 
     // Get evaluation metrics.
-    lazy val metrics = new MulticlassMetrics(labelAndPreds)
+    lazy val metrics = new MulticlassMetrics(predictionAndLabels)
     val accuracy = metrics.accuracy
     println(s"Accuracy = $accuracy")
 
-    lazy val testErr = labelAndPreds.filter(r => r._1 != r._2).count().toDouble / test.count()
-    println("Test Error = " + testErr)
-    // println("Learned classification tree model:\n" + model.toDebugString)
-
     // Save model
-    model.save(sc, "target/tmp/DecisionTreeModel")
+    model.save(sc, "target/tmp/LogisticRegressionModel")
 
     model
   }

@@ -1,16 +1,17 @@
-package services
+package models
 
 import org.apache.spark.SparkContext
-import org.apache.spark.ml.linalg.{Vector, Vectors}
-import org.apache.spark.ml.feature.LabeledPoint
 import org.apache.spark.ml.classification.{MultilayerPerceptronClassificationModel, MultilayerPerceptronClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-
+import org.apache.spark.ml.feature.LabeledPoint
+import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.{Row, SparkSession}
 
 /**
   * Created by vincentliu on 05/12/2016.
   */
-object neuralNetwork extends mlAlgorithms[MultilayerPerceptronClassificationModel]{
+class NeuralNetwork extends ModelGenerator[MultilayerPerceptronClassificationModel]{
 
   def getModel(sc: SparkContext, file: String) = {
     // if the model already exists, then retrieve the model from directory
@@ -36,11 +37,21 @@ object neuralNetwork extends mlAlgorithms[MultilayerPerceptronClassificationMode
 
     // Split data into training (70%) and test (30%).
     val splits = parsedData.randomSplit(Array(0.7, 0.3), seed = 11L)
-    val (training, test) = (splits(0), splits(1)))
+    val (training, test) = (splits(0), splits(1))
 
     // Transform training and test set into Dataframe
-    val trainFrame = training toDF
-    val testFrame = test toDF
+    val session = SparkSession.builder()
+      .master("local")
+      .appName("PokemonGo")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
+
+    val schema = StructType(
+      List(StructField("label", DoubleType),
+        StructField("features", ArrayType(DoubleType, false))))
+
+    val trainFrame = session.createDataFrame(training.map(p => Row(p.label, p.features)), schema)
+    val testFrame = session.createDataFrame(test.map(p => Row(p.label, p.features)), schema)
 
     // NN
     // specify layers for the neural network:

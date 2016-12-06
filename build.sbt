@@ -18,5 +18,6 @@ libraryDependencies ++= Seq(
   jdbc, cache, ws, specs2 % Test,
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "org.apache.spark" % "spark-core_2.11" % "2.0.1",
-  "org.apache.spark" % "spark-mllib_2.11" % "2.0.1"
+  "org.apache.spark" % "spark-mllib_2.11" % "2.0.1",
+  "org.apache.spark" % "spark-hive_2.11" % "2.0.1"
 )
