@@ -16,7 +16,7 @@ import models._
 object Predictor {
 
   def predict(address: Address): String = {
-    val sc = new SparkContext(
+    val sc = SparkContext.getOrCreate(
       new SparkConf()
         .setMaster("local")
         .setAppName("PokemonGo")
@@ -27,9 +27,7 @@ object Predictor {
 
     val input = collectInput(address)
 
-    val prediction = model.predict(input).toInt
-
-    prediction match {
+    model.predict(input).toInt match {
       case 0 => "Common"
       case 1 => "Rare"
       case 2 => "Very Rare"

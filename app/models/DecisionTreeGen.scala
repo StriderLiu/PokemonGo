@@ -26,7 +26,7 @@ object DecisionTreeGen {
 
     modelOption match {
       case Some(model) => model
-      case _ => train(sc, file)
+      case None => train(sc, file)
     }
 //    train(sc, file)
   }
@@ -58,10 +58,10 @@ object DecisionTreeGen {
     val maxDepth = 15
     val maxBins = 32
 
-    lazy val model = DecisionTree.trainClassifier(training, numClasses, categoricalFeaturesInfo, impurity, maxDepth, maxBins)
+    val model = DecisionTree.trainClassifier(training, numClasses, categoricalFeaturesInfo, impurity, maxDepth, maxBins)
 
     // Evaluate model on test instances and compute test error
-    lazy val labelAndPreds = test.map { point =>
+    val labelAndPreds = test.map { point =>
       val prediction = model.predict(point.features)
       (point.label, prediction)
     }
