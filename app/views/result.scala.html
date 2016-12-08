@@ -1,4 +1,4 @@
-@(res: Future[String])
+@(res: String)
 
 @import helper._
 @import scala.concurrent.Future
@@ -11,9 +11,7 @@
 </head>
 <body>
   <p>
-    @res onSuccess {
-      case type => type
-    }
+    @res
   </p>
 
   @form(routes.PokeController.index) {

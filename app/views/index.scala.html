@@ -4,12 +4,12 @@
 
 @main("Pokemon Detection") {
 
-    @form(routes.PokeController.add) {
-        @inputText(address("street"))
-        @inputText(address("city"))
-        @inputText(address("state"))
-        @inputText(address("zipcode"))
-        @inputText(address("country"))
+    @form(routes.PokeController.predict()) {
+        @inputText(address("street")) # 1111 S Figueroa St
+        @inputText(address("city"))   # Los_Angeles
+        @inputText(address("state"))  # CA
+        @inputText(address("zipcode"))# 90015
+        @inputText(address("country"))# USA
 
         <div class="buttons">
             <input type="submit" value="Submit"/>

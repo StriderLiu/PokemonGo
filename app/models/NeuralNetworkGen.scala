@@ -1,5 +1,6 @@
 package models
 
+//import javax.inject.Singleton
 import org.apache.spark.SparkContext
 import org.apache.spark.ml.classification.{MultilayerPerceptronClassificationModel, MultilayerPerceptronClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
@@ -11,9 +12,9 @@ import org.apache.spark.sql.{Row, SparkSession}
 /**
   * Created by vincentliu on 05/12/2016.
   */
-class NeuralNetwork extends ModelGenerator[MultilayerPerceptronClassificationModel]{
+object NeuralNetworkGen {
 
-  def getModel(sc: SparkContext, file: String) = {
+  def getModel(sc: SparkContext, file: String): MultilayerPerceptronClassificationModel = {
     // if the model already exists, then retrieve the model from directory
     // if the model does not exist, then train the data set and get a model
     val modelOption = Option(MultilayerPerceptronClassificationModel.load("target/tmp/NeuralNetworkModel"))
@@ -24,14 +25,14 @@ class NeuralNetwork extends ModelGenerator[MultilayerPerceptronClassificationMod
     }
   }
 
-  private def train(sc: SparkContext, file: String) = {
+  private def train(sc: SparkContext, file: String):MultilayerPerceptronClassificationModel = {
     // Data cleansing
-    lazy val data = sc.textFile(file)
+    val data = sc.textFile(file)
       .map(_.split(","))
       .filter(line => line(0) != "class")
       .map(_ map (_.toDouble))
 
-    lazy val parsedData = for{
+    val parsedData = for{
       vals <- data
     } yield LabeledPoint(vals(42), Vectors.dense(vals.slice(0, 42)))
 

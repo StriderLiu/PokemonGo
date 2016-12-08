@@ -1,60 +1,52 @@
 package services
 
-import org.apache.spark.mllib.tree.model.DecisionTreeModel
 import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.{SparkConf, SparkContext}
-import javax.inject.{Inject, Singleton}
-
 import play.api.libs.json.{JsValue, Json}
-
 import scala.io.Source.fromURL
 import java.util.Calendar
 import java.util.Date
 import scala.collection.immutable.HashMap
 import scala.util.Random
-
-import scala.concurrent.{ExecutionContext, Future}
 import models._
 
 /**
   * Created by vincentliu on 05/12/2016.
   */
-@Singleton
-class Predictor @Inject()(modelGenerator: ModelGenerator[DecisionTreeModel])
-                         (implicit ec: ExecutionContext) {
+object Predictor {
 
-  def predict(address: Address): Future[String] = {
+  def predict(address: Address): String = {
     val sc = new SparkContext(
       new SparkConf()
         .setMaster("local")
         .setAppName("PokemonGo")
     )
+
     // Get the model
-    lazy val model = modelGenerator.getModel(sc, "/Users/vincentliu/Desktop/Courses_2016Fall/CSYE7200_Scala/Final Project/poke_43.csv")
+    val model = DecisionTreeGen.getModel(sc, "/Users/vincentliu/Desktop/Courses_2016Fall/CSYE7200_Scala/Final Project/poke_43.csv")
 
-    lazy val input = collectInput(address)
+    val input = collectInput(address)
 
-    lazy val prediction = model.predict(input).toInt
+    val prediction = model.predict(input).toInt
 
-    Future(
-      prediction match {
-        case 0 => "Bug"
-        case 1 => "Dragon"
-        case 2 => "Electric"
-        case 3 => "Fairy"
-        case 4 => "Fighting"
-        case 5 => "Fire"
-        case 6 => "Ghost"
-        case 7 => "Grass"
-        case 8 => "Ground"
-        case 9 => "Ice"
-        case 10 => "Normal"
-        case 11 => "Poison"
-        case 12 => "Psychic"
-        case 13 => "Rock"
-        case 14 => "Water"
-      }
-    )
+    prediction match {
+      case 0 => "Bug"
+      case 1 => "Dragon"
+      case 2 => "Electric"
+      case 3 => "Fairy"
+      case 4 => "Fighting"
+      case 5 => "Fire"
+      case 6 => "Ghost"
+      case 7 => "Grass"
+      case 8 => "Ground"
+      case 9 => "Ice"
+      case 10 => "Normal"
+      case 11 => "Poison"
+      case 12 => "Psychic"
+      case 13 => "Rock"
+      case 14 => "Water"
+    }
+
   }
 
   private def collectInput(address: Address): Vector = {
