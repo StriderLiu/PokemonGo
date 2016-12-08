@@ -33,7 +33,7 @@ class DecisionTree extends ModelGenerator[DecisionTreeModel]{
 
     lazy val parsedData = for{
       vals <- data
-    } yield LabeledPoint(vals(196), Vectors.dense(vals.slice(0, 196)))
+    } yield LabeledPoint(vals(42), Vectors.dense(vals.slice(0, 42)))
 
     // Normalization
     lazy val scaler = new StandardScaler().fit(parsedData map (_.features))
@@ -48,7 +48,7 @@ class DecisionTree extends ModelGenerator[DecisionTreeModel]{
     val numClasses = 15
     val categoricalFeaturesInfo = Map[Int, Int]()
     val impurity = "gini"
-    val maxDepth = 15
+    val maxDepth = 20
     val maxBins = 32
 
     lazy val model = DecisionTree.trainClassifier(training, numClasses, categoricalFeaturesInfo, impurity, maxDepth, maxBins)

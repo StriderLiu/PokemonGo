@@ -33,7 +33,7 @@ class NeuralNetwork extends ModelGenerator[MultilayerPerceptronClassificationMod
 
     lazy val parsedData = for{
       vals <- data
-    } yield LabeledPoint(vals(196), Vectors.dense(vals.slice(0, 196)))
+    } yield LabeledPoint(vals(42), Vectors.dense(vals.slice(0, 42)))
 
     // Split data into training (70%) and test (30%).
     val splits = parsedData.randomSplit(Array(0.7, 0.3), seed = 11L)

@@ -36,7 +36,6 @@ class PokeController @Inject() (predictor: Predictor, val messagesApi: MessagesA
   }
 
   def add = Action.async {
-    // Bind the form first, then fold the result, passing a function to handle errors, and a function to handle succes.
     addressForm.bindFromRequest.fold(
       errorForm => {
         Future.successful(Ok(views.html.index(errorForm)))

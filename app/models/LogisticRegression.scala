@@ -32,7 +32,7 @@ class LogisticRegression extends ModelGenerator[LogisticRegressionModel]{
 
     lazy val parsedData = for{
       vals <- data
-    } yield LabeledPoint(vals(196), Vectors.dense(vals.slice(0, 196)))
+    } yield LabeledPoint(vals(42), Vectors.dense(vals.slice(0, 42))
 
     // Normalization
     lazy val scaler = new StandardScaler().fit(parsedData map (_.features))
