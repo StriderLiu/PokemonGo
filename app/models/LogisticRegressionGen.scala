@@ -26,17 +26,17 @@ object LogisticRegressionGen {
 
   private def train(sc: SparkContext, file: String): LogisticRegressionModel = {
     // Data cleansing
-    val data = sc.textFile(file)
+    lazy val data = sc.textFile(file)
       .map(_.split(","))
-      .filter(line => line(0) != "class")
+      .filter(line => line(0) != "latitude")
       .map(_ map (_.toDouble))
 
     val parsedData = for{
       vals <- data
-    } yield LabeledPoint(vals(42), Vectors.dense(vals.slice(0, 42)))
+    } yield LabeledPoint(vals(41), Vectors.dense(vals.slice(0, 41)))
 
     // Normalization
-    val scaler = new StandardScaler().fit(parsedData map (_.features))
+    lazy val scaler = new StandardScaler().fit(parsedData map (_.features))
     val normalizedData = parsedData.map(p => LabeledPoint(p.label, scaler.transform(p.features)))
 
     // Split data into training (70%) and test (30%).
@@ -45,12 +45,12 @@ object LogisticRegressionGen {
 
     // Logistic Regression
     // Run training algorithm to build the model
-    val model = new LogisticRegressionWithLBFGS()
-      .setNumClasses(15)
+    lazy val model = new LogisticRegressionWithLBFGS()
+      .setNumClasses(3)
       .run(training)
 
     // Compute raw scores on the test set.
-    val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
+    lazy val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
       val prediction = model.predict(features)
       (prediction, label)
     }

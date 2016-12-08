@@ -27,14 +27,14 @@ object NeuralNetworkGen {
 
   private def train(sc: SparkContext, file: String):MultilayerPerceptronClassificationModel = {
     // Data cleansing
-    val data = sc.textFile(file)
+    lazy val data = sc.textFile(file)
       .map(_.split(","))
-      .filter(line => line(0) != "class")
+      .filter(line => line(0) != "latitude")
       .map(_ map (_.toDouble))
 
     val parsedData = for{
       vals <- data
-    } yield LabeledPoint(vals(42), Vectors.dense(vals.slice(0, 42)))
+    } yield LabeledPoint(vals(41), Vectors.dense(vals.slice(0, 41)))
 
     // Split data into training (70%) and test (30%).
     val splits = parsedData.randomSplit(Array(0.7, 0.3), seed = 11L)
@@ -58,7 +58,7 @@ object NeuralNetworkGen {
     // specify layers for the neural network:
     // input layer of size 196 (features), two intermediate of size 50 and 50
     // and output of size 15 (classes)
-    val layers = Array[Int](196, 80, 15)
+    val layers = Array[Int](41, 20, 3)
     // create the trainer and set its parameters
     val trainer = new MultilayerPerceptronClassifier()
       .setLayers(layers)
@@ -67,7 +67,7 @@ object NeuralNetworkGen {
       .setMaxIter(100)
 
     // train the model
-    val model = trainer.fit(trainFrame)
+    lazy val model = trainer.fit(trainFrame)
 
     // compute accuracy on the test set
     val result = model.transform(testFrame)

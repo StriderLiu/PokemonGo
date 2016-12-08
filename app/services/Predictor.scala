@@ -30,38 +30,25 @@ object Predictor {
     val prediction = model.predict(input).toInt
 
     prediction match {
-      case 0 => "Bug"
-      case 1 => "Dragon"
-      case 2 => "Electric"
-      case 3 => "Fairy"
-      case 4 => "Fighting"
-      case 5 => "Fire"
-      case 6 => "Ghost"
-      case 7 => "Grass"
-      case 8 => "Ground"
-      case 9 => "Ice"
-      case 10 => "Normal"
-      case 11 => "Poison"
-      case 12 => "Psychic"
-      case 13 => "Rock"
-      case 14 => "Water"
+      case 0 => "Common"
+      case 1 => "Rare"
+      case 2 => "Very Rare"
     }
-
   }
 
   private def collectInput(address: Address): Vector = {
-    val coord = getCoordianate(address.street + ", " + address.city + ", " +
-      address.state + " " + address.zipcode  + ", " + address.country)
+    val coord = getCoordianate(address.street.replace(' ', '+') + ",+" + address.city + ",+" +
+      address.state + "+" + address.zipcode  + ",+" + address.country)
 
-    val appearedHour = getCurTime.getHours
-    val appearedMinute = getCurTime.getMinutes
-    val appearedDayOfWeek = getCurTime.getDay
-    val appearedDate = getCurTime.getDate
+    val appearedHour = getCurTime.getHours.toDouble
+    val appearedMinute = getCurTime.getMinutes.toDouble
+    val appearedDayOfWeek = getCurTime.getDay.toDouble
+    val appearedDate = getCurTime.getDate.toDouble
     val appearedTimeOfDay = appearedHour match {
-      case x if x >= 0 && x < 6 => 4
-      case x if x >= 6 && x < 12 => 3
-      case x if x >=12 && x < 18 => 1
-      case x if x >= 18 => 2
+      case x if x >= 0 && x < 6 => 4.0
+      case x if x >= 6 && x < 12 => 3.0
+      case x if x >=12 && x < 18 => 1.0
+      case x if x >= 18 => 2.0
     }
 
     val terrainType = getTerrainType
@@ -105,19 +92,16 @@ object Predictor {
     val pokestopIn2500m = hasPokestopIn2500m(pokestopDistance)
     val pokestopIn5000m = hasPokestopIn5000m(pokestopDistance)
 
-    val rarity = 1
-
     Vectors.dense(
-      coord.lat, coord.lng,
-      appearedTimeOfDay, appearedHour, appearedMinute, appearedDayOfWeek, appearedDate,
-      terrainType, closeToWater, city, continent,
-      weather, temperature, windSpeed, windBearing, pressure,
-      sunriseMinutesMidnight, sunriseHour, sunriseMinute, sunsetMinutesMidnight, sunsetHour, sunsetMinute,
-      popDensity, urban, suburban, midurban, rural,
-      gymDistance, gymIn100m, gymIn250m, gymIn500m, gymIn1000m, gymIn2500m, gymIn5000m,
-      pokestopDistance, pokestopIn100m, pokestopIn250m, pokestopIn500m, pokestopIn1000m, pokestopIn2500m, pokestopIn5000m,
-      rarity
-    )
+      coord.lat, coord.lng, // 2
+      appearedTimeOfDay, appearedHour, appearedMinute, appearedDayOfWeek, appearedDate, // 5
+      terrainType, closeToWater, city, continent, //4
+      weather, temperature, windSpeed, windBearing, pressure,// 5
+      sunriseMinutesMidnight, sunriseHour, sunriseMinute, sunsetMinutesMidnight, sunsetHour, sunsetMinute, // 6
+      popDensity, urban, suburban, midurban, rural, // 5
+      gymDistance, gymIn100m, gymIn250m, gymIn500m, gymIn1000m, gymIn2500m, gymIn5000m, // 7
+      pokestopDistance, pokestopIn100m, pokestopIn250m, pokestopIn500m, pokestopIn1000m, pokestopIn2500m, pokestopIn5000m // 7
+    ) // 41
   }
 
   private def getCoordianate(address: String): Coordinate = {
