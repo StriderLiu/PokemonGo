@@ -16,32 +16,28 @@ import models._
 object Predictor {
 
   def predict(address: Address): String = {
-    val sc = SparkContext.getOrCreate(
+    val sc = new SparkContext(
       new SparkConf()
         .setMaster("local")
         .setAppName("PokemonGo")
     )
 
     // Get the model
-    val model = NeuralNetworkGen.getModel(sc, "/Users/vincentliu/Desktop/Courses_2016Fall/CSYE7200_Scala/Final Project/poke_43.csv")
+    val model = DecisionTreeGen.getModel(sc, "/Users/vincentliu/Desktop/Courses_2016Fall/CSYE7200_Scala/Final Project/poke_43.csv")
 
     val input = collectInput(address)
 
-    val result = NeuralNetworkGen.predict(sc, model, input).toInt match {
+    val prediction = model.predict(input).toInt
+
+    prediction match {
       case 0 => "Common"
       case 1 => "Rare"
       case 2 => "Very Rare"
     }
   }
 
-//    model.predict(input).toInt match {
-//      case 0 => "Common"
-//      case 1 => "Rare"
-//      case 2 => "Very Rare"
-//    }
-
-  private def collectInput(address: Address): Vector = {
-    val coord = getCoordianate(address.street.replace(' ', '+') + ",+" + address.city + ",+" +
+  def collectInput(address: Address): Vector = {
+    val coord = getCoordinate(address.street.replace(' ', '+') + ",+" + address.city + ",+" +
       address.state + "+" + address.zipcode  + ",+" + address.country)
 
     val appearedHour = getCurTime.getHours.toDouble
@@ -108,7 +104,7 @@ object Predictor {
     ) // 41
   }
 
-  private def getCoordianate(address: String): Coordinate = {
+  private def getCoordinate(address: String): Coordinate = {
     val key = "AIzaSyDXxUKKAooWrPYxk09yudhZCKVw5zTWYlw"
     val url = s"https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${key}"
     val coord = ((toJson(url) \ "results" )(0) \ "geometry" \ "location")
