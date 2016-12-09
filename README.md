@@ -49,7 +49,11 @@ Data Science Toolkits: http://www.datasciencetoolkit.org/developerdocs#coordinat
 # ToolKit
 
 Scala 2.11.7
+
 Spark & Spark Mllib 2.0.1
+
 Play 2.5.10
+
 Zeppelin 0.6.2
+
 Python 3.5     
