@@ -23,16 +23,22 @@ object Predictor {
     )
 
     // Get the model
-    val model = DecisionTreeGen.getModel(sc, "/Users/vincentliu/Desktop/Courses_2016Fall/CSYE7200_Scala/Final Project/poke_43.csv")
+    val model = NeuralNetworkGen.getModel(sc, "/Users/vincentliu/Desktop/Courses_2016Fall/CSYE7200_Scala/Final Project/poke_43.csv")
 
     val input = collectInput(address)
 
-    model.predict(input).toInt match {
+    val result = NeuralNetworkGen.predict(sc, model, input).toInt match {
       case 0 => "Common"
       case 1 => "Rare"
       case 2 => "Very Rare"
     }
   }
+
+//    model.predict(input).toInt match {
+//      case 0 => "Common"
+//      case 1 => "Rare"
+//      case 2 => "Very Rare"
+//    }
 
   private def collectInput(address: Address): Vector = {
     val coord = getCoordianate(address.street.replace(' ', '+') + ",+" + address.city + ",+" +

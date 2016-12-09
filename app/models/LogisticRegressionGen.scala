@@ -16,17 +16,24 @@ object LogisticRegressionGen {
   def getModel(sc: SparkContext, file: String): LogisticRegressionModel = {
     // if the model already exists, then retrieve the model from directory
     // if the model does not exist, then train the data set and get a model
-    val modelOption = Option(LogisticRegressionModel.load(sc, "target/tmp/LogisticRegressionModel"))
+//    val modelOption = Option(LogisticRegressionModel.load(sc, "target/tmp/LogisticRegressionModel"))
+    val modelOption: Option[LogisticRegressionModel] = {
+      try {
+        Some(LogisticRegressionModel.load(sc, "resources/models/LogisticRegressionModel"))
+      } catch {
+        case ex: Exception => None
+      }
+    }
 
     modelOption match {
       case Some(model) => model
-      case _ => train(sc, file)
+      case None => train(sc, file)
     }
   }
 
   private def train(sc: SparkContext, file: String): LogisticRegressionModel = {
     // Data cleansing
-    lazy val data = sc.textFile(file)
+    val data = sc.textFile(file)
       .map(_.split(","))
       .filter(line => line(0) != "latitude")
       .map(_ map (_.toDouble))
@@ -36,7 +43,7 @@ object LogisticRegressionGen {
     } yield LabeledPoint(vals(41), Vectors.dense(vals.slice(0, 41)))
 
     // Normalization
-    lazy val scaler = new StandardScaler().fit(parsedData map (_.features))
+    val scaler = new StandardScaler().fit(parsedData map (_.features))
     val normalizedData = parsedData.map(p => LabeledPoint(p.label, scaler.transform(p.features)))
 
     // Split data into training (70%) and test (30%).
@@ -45,12 +52,12 @@ object LogisticRegressionGen {
 
     // Logistic Regression
     // Run training algorithm to build the model
-    lazy val model = new LogisticRegressionWithLBFGS()
+    val model = new LogisticRegressionWithLBFGS()
       .setNumClasses(3)
       .run(training)
 
     // Compute raw scores on the test set.
-    lazy val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
+    val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
       val prediction = model.predict(features)
       (prediction, label)
     }
@@ -61,7 +68,7 @@ object LogisticRegressionGen {
     println(s"Accuracy = $accuracy")
 
     // Save model
-    model.save(sc, "target/tmp/LogisticRegressionModel")
+    model.save(sc, "resources/models/LogisticRegressionModel")
 
     model
   }

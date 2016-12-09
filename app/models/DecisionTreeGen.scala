@@ -18,7 +18,7 @@ object DecisionTreeGen {
     // if the model does not exist, then train the data set and get a model
     val modelOption: Option[DecisionTreeModel] = {
       try {
-        Some(DecisionTreeModel.load(sc, "target/tmp/DecisionTreeModel"))
+        Some(DecisionTreeModel.load(sc, "resources/models/DecisionTreeModel"))
       } catch {
         case ex: Exception => None
       }
@@ -28,7 +28,6 @@ object DecisionTreeGen {
       case Some(model) => model
       case None => train(sc, file)
     }
-//    train(sc, file)
   }
 
   private def train(sc: SparkContext, file: String): DecisionTreeModel = {
@@ -76,7 +75,7 @@ object DecisionTreeGen {
     // println("Learned classification tree model:\n" + model.toDebugString)
 
     // Save model
-    model.save(sc, "target/tmp/DecisionTreeModel")
+    model.save(sc, "resources/models/DecisionTreeModel")
 
     model
   }

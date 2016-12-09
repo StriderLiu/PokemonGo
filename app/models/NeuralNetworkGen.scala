@@ -1,33 +1,61 @@
 package models
 
 //import javax.inject.Singleton
+import java.util
+
 import org.apache.spark.SparkContext
 import org.apache.spark.ml.classification.{MultilayerPerceptronClassificationModel, MultilayerPerceptronClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.LabeledPoint
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.rdd.RDD
 
 /**
   * Created by vincentliu on 05/12/2016.
   */
 object NeuralNetworkGen {
 
+  private val session = SparkSession.builder()
+    .master("local")
+    .appName("PokemonGo")
+    .config("spark.some.config.option", "some-value")
+    .getOrCreate()
+
+  private val schema = StructType(
+    List(StructField("label", DoubleType),
+      StructField("features", ArrayType(DoubleType, false))))
+
+
   def getModel(sc: SparkContext, file: String): MultilayerPerceptronClassificationModel = {
     // if the model already exists, then retrieve the model from directory
     // if the model does not exist, then train the data set and get a model
-    val modelOption = Option(MultilayerPerceptronClassificationModel.load("target/tmp/NeuralNetworkModel"))
+    val modelOption: Option[MultilayerPerceptronClassificationModel] = {
+      try {
+        Some(MultilayerPerceptronClassificationModel.load("resources/models/NeuralNetworkModel"))
+      } catch {
+        case ex: Exception => None
+      }
+    }
 
     modelOption match {
       case Some(model) => model
-      case _ => train(sc, file)
+      case None => train(sc, file)
     }
+  }
+
+  def predict(sc: SparkContext, model: MultilayerPerceptronClassificationModel,
+                      input: org.apache.spark.mllib.linalg.Vector): Double = {
+    val rdd = sc.parallelize(List[Double](input.toArray))
+    val frame: DataFrame = session.createDataFrame(rowList, schema) // RDD[Row]
+
+    model.transform(frame).select("prediction").first().getInt(0)
   }
 
   private def train(sc: SparkContext, file: String):MultilayerPerceptronClassificationModel = {
     // Data cleansing
-    lazy val data = sc.textFile(file)
+    val data = sc.textFile(file)
       .map(_.split(","))
       .filter(line => line(0) != "latitude")
       .map(_ map (_.toDouble))
@@ -41,16 +69,6 @@ object NeuralNetworkGen {
     val (training, test) = (splits(0), splits(1))
 
     // Transform training and test set into Dataframe
-    val session = SparkSession.builder()
-      .master("local")
-      .appName("PokemonGo")
-      .config("spark.some.config.option", "some-value")
-      .getOrCreate()
-
-    val schema = StructType(
-      List(StructField("label", DoubleType),
-        StructField("features", ArrayType(DoubleType, false))))
-
     val trainFrame = session.createDataFrame(training.map(p => Row(p.label, p.features)), schema)
     val testFrame = session.createDataFrame(test.map(p => Row(p.label, p.features)), schema)
 
@@ -67,7 +85,7 @@ object NeuralNetworkGen {
       .setMaxIter(100)
 
     // train the model
-    lazy val model = trainer.fit(trainFrame)
+    val model = trainer.fit(trainFrame)
 
     // compute accuracy on the test set
     val result = model.transform(testFrame)
@@ -77,7 +95,7 @@ object NeuralNetworkGen {
     println("Accuracy: " + evaluator.evaluate(predictionAndLabels))
 
     // Save model
-    model.save("target/tmp/NeuralNetworkModel")
+    model.save("resources/models/NeuralNetworkModel")
 
     model
   }
