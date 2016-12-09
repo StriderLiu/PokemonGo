@@ -1,11 +1,34 @@
 import models.{Address, Coordinate}
+import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{FlatSpec, Matchers}
 import services.Predictor._
+
+
 
 /**
   * Created by Shuxian on 12/8/16.
   */
 class PredictorSpec extends FlatSpec with Matchers{
+
+  behavior of "parsedData"
+  // There are two kind vectors we used in project based on different models we used
+
+  it should "work for other data" in {
+    val sc = SparkContext.getOrCreate(
+      new SparkConf()
+        .setMaster("local")
+        .setAppName("PokemonGo")
+    )
+    val dataGen=sc.textFile("resources/test.csv")
+      .map(_.split(","))
+      .filter(line => line(0) != "y_3")
+      .map(_ map (_.toDouble))
+    val data= parseData(dataGen,6)
+    val firstLabel= data.first().label
+
+    firstLabel should be (12.0)
+
+  }
 
   behavior of "getCoordianate"
 
