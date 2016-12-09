@@ -48,7 +48,7 @@ Data Science Toolkits: http://www.datasciencetoolkit.org/developerdocs#coordinat
 
 # ToolKit
 
-Scala 2.11.7
+Scala 2.11.8
 
 Spark & Spark Mllib 2.0.1
 
