@@ -7,6 +7,7 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.tree.DecisionTree
 import org.apache.spark.mllib.tree.model.DecisionTreeModel
+import org.apache.spark.rdd.RDD
 
 /**
   * Created by vincentliu on 05/12/2016.
@@ -37,9 +38,7 @@ object DecisionTreeGen {
       .filter(line => line(0) != "latitude")
       .map(_ map (_.toDouble))
 
-    val parsedData = for{
-      vals <- data
-    } yield LabeledPoint(vals(41), Vectors.dense(vals.slice(0, 41)))
+    val parsedData = parseData(data, 41)
 
     // Normalization
     val scaler = new StandardScaler().fit(parsedData map (_.features))
@@ -79,4 +78,8 @@ object DecisionTreeGen {
 
     model
   }
+
+  def parseData(data: RDD[Array[Double]], colNums: Int): RDD[LabeledPoint] = for{
+    vals <- data
+  } yield LabeledPoint(vals(colNums), Vectors.dense(vals.slice(0, colNums)))
 }

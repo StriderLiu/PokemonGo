@@ -5,18 +5,21 @@
 @main("Pokemon Detection") {
 
     @form(routes.PokeController.predict()) {
-        @inputText(address("Street")) # 1111 S Figueroa St
-        @inputText(address("City")) # Los_Angeles
-        @inputText(address("State")) # CA
-        @inputText(address("Zipcode"))# 90015
-        @inputText(address("Country"))# USA
+        @inputText(address("Street"), 'placeholder -> "1111 S Figueroa St")
+        @inputText(address("City"), 'placeholder -> "Los_Angeles")
+        @inputText(address("State"), 'placeholder -> "CA")
+        @inputText(address("Zipcode"), 'placeholder -> "90015")
+        @inputText(address("Country"), 'placeholder -> "USA")
+        <div class = 'selection-handle'>
         @select(address("Select Algorithm"), Seq(
             "decisionTree" -> "Decision Tree",
             "logisticReg" -> "Logistic Regression",
             "NeuralNet" -> "Neural Network"))
+        </div>
 
-        <div class="buttons">
+        <div class = 'btn-large'>
             <input type="submit" value="Submit"/>
         </div>
+
     }
 }

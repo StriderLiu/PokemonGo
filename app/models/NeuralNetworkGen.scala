@@ -5,6 +5,7 @@ import org.apache.spark.ml.classification.{MultilayerPerceptronClassificationMod
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.LabeledPoint
 import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 
 /**
@@ -53,9 +54,7 @@ object NeuralNetworkGen {
       .filter(line => line(0) != "latitude")
       .map(_ map (_.toDouble))
 
-    val parsedData = for{
-      vals <- data
-    } yield LabeledPoint(vals(41), Vectors.dense(vals.slice(0, 41)))
+    val parsedData = parseData(data, 41)
 
     // Split data into training (70%) and test (30%).
     val splits = parsedData.randomSplit(Array(0.7, 0.3), seed = 11L)
@@ -93,4 +92,8 @@ object NeuralNetworkGen {
 
     model
   }
+
+  def parseData(data: RDD[Array[Double]], colNums: Int): RDD[LabeledPoint] = for{
+    vals <- data
+  } yield LabeledPoint(vals(colNums), Vectors.dense(vals.slice(0, colNums)))
 }
