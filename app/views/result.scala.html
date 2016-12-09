@@ -1,23 +1,42 @@
-@(res: String)
+@(res: String, coord: Coordinate)
 
 @import helper._
-@import scala.concurrent.Future
+@import com.google._
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
-  <p>
-    @res
-  </p>
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <h1>Pokemon Rarity Prediction:</h1>
+        <p>
+        @res
+        </p>
 
-  @form(routes.PokeController.index) {
-    <div class="buttons">
-      <input type="submit" value="Return to Main"/>
-    </div>
-  }
-</body>
+        <div id="map"></div>
+        <script>
+                function initMap() {
+                    var pos = {lat: @coord.lat, lng: @coord.lng};
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 4,
+                        center: pos
+                    });
+                    var marker = new google.maps.Marker({
+                        position: pos,
+                        map: map
+                    });
+                }
+        </script>
+        <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXxUKKAooWrPYxk09yudhZCKVw5zTWYlw&callback=initMap">
+        </script>
+
+        @form(routes.PokeController.index) {
+            <div class="buttons">
+                <input type="submit" value="Return to Main"/>
+            </div>
+        }
+    </body>
 </html>

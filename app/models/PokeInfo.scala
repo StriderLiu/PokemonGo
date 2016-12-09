@@ -6,4 +6,4 @@ package models
 
 case class Coordinate(lat: Double, lng: Double)
 
-case class Address(street: String, city: String, state: String, zipcode: String, country: String)
+case class Address(street: String, city: String, state: String, zipcode: String, country: String, selectAlgo: String)

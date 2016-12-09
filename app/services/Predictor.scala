@@ -22,12 +22,24 @@ object Predictor {
         .setAppName("PokemonGo")
     )
 
-    // Get the model
-    val model = NeuralNetworkGen.getModel(sc, "resources/poke_43.csv")
-
     val input = collectInput(address)
 
-    NeuralNetworkGen.predict(sc, model, input).toInt match {
+    val output = address.selectAlgo match {
+      case "decisionTree" => {
+        val model = DecisionTreeGen.getModel(sc, "resources/poke_43.csv")
+        model.predict(input).toInt
+      }
+      case "logisticReg" => {
+        val model = LogisticRegressionGen.getModel(sc, "resources/poke_43.csv")
+        model.predict(input).toInt
+      }
+      case "NeuralNet" => {
+        val model = NeuralNetworkGen.getModel(sc, "resources/poke_43.csv")
+        NeuralNetworkGen.predict(sc, model, input).toInt
+      }
+    }
+
+    output match {
       case 0 => "Common"
       case 1 => "Rare"
       case 2 => "Very Rare"
@@ -40,8 +52,7 @@ object Predictor {
 //    }
 
   private def collectInput(address: Address): Vector = {
-    val coord = getCoordinate(address.street.replace(' ', '+') + ",+" + address.city + ",+" +
-      address.state + "+" + address.zipcode  + ",+" + address.country)
+    val coord = getCoordinate(address)
 
     val appearedHour = getCurTime.getHours.toDouble
     val appearedMinute = getCurTime.getMinutes.toDouble
@@ -107,9 +118,11 @@ object Predictor {
     ) // 41
   }
 
-  def getCoordinate(address: String): Coordinate = {
+  def getCoordinate(address: Address): Coordinate = {
+    val addr = address.street.replace(' ', '+') + ",+" + address.city + ",+" +
+      address.state + "+" + address.zipcode  + ",+" + address.country
     val key = "AIzaSyDXxUKKAooWrPYxk09yudhZCKVw5zTWYlw"
-    val url = s"https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${key}"
+    val url = s"https://maps.googleapis.com/maps/api/geocode/json?address=${addr}&key=${key}"
     val coord = ((toJson(url) \ "results" )(0) \ "geometry" \ "location")
     Coordinate((coord \ "lat").as[Double], (coord \ "lng").as[Double])
   }

@@ -15,11 +15,12 @@ class PokeController @Inject() (val messagesApi: MessagesApi) extends Controller
     */
   val addressForm: Form[Address] = Form {
     mapping(
-      "street" -> nonEmptyText,
-      "city" -> nonEmptyText,
-      "state"  -> nonEmptyText,
-      "zipcode" -> nonEmptyText,
-      "country" -> nonEmptyText
+      "Street" -> nonEmptyText,
+      "City" -> nonEmptyText,
+      "State"  -> nonEmptyText,
+      "Zipcode" -> nonEmptyText,
+      "Country" -> nonEmptyText,
+      "Select Algorithm" -> text
     )(Address.apply)(Address.unapply)
   }
 
@@ -36,7 +37,7 @@ class PokeController @Inject() (val messagesApi: MessagesApi) extends Controller
         BadRequest(views.html.index(formWithErrors))
       },
       address => {
-        Ok(views.html.result(Predictor.predict(address)))
+        Ok(views.html.result(Predictor.predict(address), Predictor.getCoordinate(address)))
       }
     )
   }
