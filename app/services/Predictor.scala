@@ -33,7 +33,6 @@ object Predictor {
       case 2 => "Very Rare"
     }
   }
-
 //    model.predict(input).toInt match {
 //      case 0 => "Common"
 //      case 1 => "Rare"
