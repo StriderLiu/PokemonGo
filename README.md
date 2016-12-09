@@ -14,7 +14,28 @@ You can find our presentation on Prezi.com at the link:
 
 http://prezi.com/rzgxbe7i7xoh/?utm_campaign=share&utm_medium=copy&rc=ex0share
 
+# Algorithems and Accuracy
+
+Logistic Regression, Neural Network and Decision Tree
+
+  (1) With 3 rarities(common, rare and very rare), accuracy is 89.27% (We are using this option for final delivery.)
+     
+  (2) With 15 types, accuracy is around 40%
+     
+  (3) With 151 poke monsters, the highest accuracy we got is 22%
+
+# Brief Instruction
+
+To get started, you need Play activator ui and run it and least once. 
+
+Pre-cleaned dataset and pre-loaded models are saved under resources folder.
+
+Folder visualization contains images we screenshot from Zeppelin and Tableau.
+
+Folder exploratory keeps are the works we did before this final delivery, including ipython file from anaconda and application from older version named PikaPika. We have not included Zeppelin notbooks yet
+
 # Data Source
+
 Predict'em All from Kaggle: https://www.kaggle.com/semioniy/predictemall
 
 PokemonGO from Kaggle: https://www.kaggle.com/abcsds/pokemongo
@@ -23,39 +44,12 @@ Google Map API for geocoding:https://developers.google.com/maps/documentation/ge
 
 Weather API Powered By Dark Sky:https://darksky.net/poweredby/
 
-Population Density API Powered by Data Science Toolkits:
-http://www.datasciencetoolkit.org/developerdocs#coordinates2statistics
+Data Science Toolkits: http://www.datasciencetoolkit.org/developerdocs#coordinates2statistics
 
-# Platform
+# ToolKit
 
-1.Experiment on Zeppelin
-
-2.Transplant to IDE
-
-# Next Step
-
-1.Data Cleansing
-     
-  (1) Drop these columns: pokemonId, appearedLocalTime, X_id, cellId_90m, cellId_180m, cellId_370m, cellId_730m, cellId_1460m, cellId_2920m, cellId_5850m, appearedDayOfWeek, appearedMonth, appearedYear, weatherIcon
-     
-  (2) Replace all "TURE" and "FALSE" with "1" and "0"
-     
-  (3) Represent appearedTimeOfDay, city, continent and weather as their corresponding number (start from 1)
-     
-  (4) Merge data from PokemonGO, add rarity and type data
-     
-  (5) Abstract US data
-     
-  (6) Normalization
-     
-2.Logistic Regression, Neural Network and Decision Tree
-
-  (1) With 151 poke monster, the highest accuracy we got is 22%
-     
-  (2) With 3 rarities(common, rare and very rare), accuracy is 89.27%
-     
-  (3) With 15 types, accuracy is around 40%
-  
-
-
-     
+Scala 2.11.7
+Spark & Spark Mllib 2.0.1
+Play 2.5.10
+Zeppelin 0.6.2
+Python 3.5     
