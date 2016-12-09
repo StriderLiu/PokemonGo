@@ -50,7 +50,7 @@ Data Science Toolkits: http://www.datasciencetoolkit.org/developerdocs#coordinat
 
 Scala 2.11.8
 
-Spark & Spark Mllib 2.0.1
+Spark & Spark Mllib & Spark SQL 2.0.1
 
 Play 2.5.10
 
