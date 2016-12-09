@@ -23,11 +23,11 @@ object Predictor {
     )
 
     // Get the model
-    val model = NeuralNetworkGen.getModel(sc, "/Users/vincentliu/Desktop/Courses_2016Fall/CSYE7200_Scala/Final Project/poke_43.csv")
+    val model = NeuralNetworkGen.getModel(sc, "resources/poke_43.csv")
 
     val input = collectInput(address)
 
-    val result = NeuralNetworkGen.predict(sc, model, input).toInt match {
+    NeuralNetworkGen.predict(sc, model, input).toInt match {
       case 0 => "Common"
       case 1 => "Rare"
       case 2 => "Very Rare"
@@ -41,7 +41,7 @@ object Predictor {
 //    }
 
   private def collectInput(address: Address): Vector = {
-    val coord = getCoordianate(address.street.replace(' ', '+') + ",+" + address.city + ",+" +
+    val coord = getCoordinate(address.street.replace(' ', '+') + ",+" + address.city + ",+" +
       address.state + "+" + address.zipcode  + ",+" + address.country)
 
     val appearedHour = getCurTime.getHours.toDouble
@@ -108,7 +108,7 @@ object Predictor {
     ) // 41
   }
 
-  private def getCoordianate(address: String): Coordinate = {
+  def getCoordinate(address: String): Coordinate = {
     val key = "AIzaSyDXxUKKAooWrPYxk09yudhZCKVw5zTWYlw"
     val url = s"https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${key}"
     val coord = ((toJson(url) \ "results" )(0) \ "geometry" \ "location")
@@ -144,7 +144,7 @@ object Predictor {
     map(cityName).toDouble
   }
 
-  private def getWeatherJson(coord: Coordinate): JsValue = {
+  def getWeatherJson(coord: Coordinate): JsValue = {
     val key = "230d97a0808f8c0bb2c722ea6e9ba251"
     val url = s" https://api.darksky.net/forecast/${key}/${coord.lat},${coord.lng}"
     toJson(url)
@@ -192,7 +192,7 @@ object Predictor {
 //  private def getSunsetMinutesMidnight(jsValue: JsValue): Int = getSunsetTime(jsValue).getHours * 60 + getSunsetTime(jsValue).getMinutes
 
   //  sources: http://www.datasciencetoolkit.org/developerdocs#coordinates2statistics
-  private def getPopDensity(coord: Coordinate): Double = {
+  def getPopDensity(coord: Coordinate): Double = {
     val url = s"http://www.datasciencetoolkit.org/coordinates2statistics/${coord.lat}%2c${coord.lng}?statistics=population_density"
     val jsValue = toJson(url)(0)
     (jsValue \ "statistics" \ "population_density" \ "value").as[Double]

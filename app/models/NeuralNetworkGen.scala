@@ -1,32 +1,22 @@
 package models
 
-//import javax.inject.Singleton
-import java.util
-
 import org.apache.spark.SparkContext
 import org.apache.spark.ml.classification.{MultilayerPerceptronClassificationModel, MultilayerPerceptronClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.LabeledPoint
 import org.apache.spark.ml.linalg.Vectors
-import org.apache.spark.sql.types._
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 
 /**
   * Created by vincentliu on 05/12/2016.
   */
 object NeuralNetworkGen {
 
-  private val session = SparkSession.builder()
+  private val spark = SparkSession.builder()
     .master("local")
     .appName("PokemonGo")
     .config("spark.some.config.option", "some-value")
     .getOrCreate()
-
-  private val schema = StructType(
-    List(StructField("label", DoubleType),
-      StructField("features", ArrayType(DoubleType, false))))
-
 
   def getModel(sc: SparkContext, file: String): MultilayerPerceptronClassificationModel = {
     // if the model already exists, then retrieve the model from directory
@@ -47,10 +37,13 @@ object NeuralNetworkGen {
 
   def predict(sc: SparkContext, model: MultilayerPerceptronClassificationModel,
                       input: org.apache.spark.mllib.linalg.Vector): Double = {
-    val rdd = sc.parallelize(List[Double](input.toArray))
-    val frame: DataFrame = session.createDataFrame(rowList, schema) // RDD[Row]
 
-    model.transform(frame).select("prediction").first().getInt(0)
+    val point = LabeledPoint(1.0, Vectors.dense(input.toArray))
+    val pointRDD = sc.parallelize(List(point))
+    import spark.implicits._
+    val inputFrame = pointRDD toDF
+
+    model.transform(inputFrame).select("prediction").first().getDouble(0)
   }
 
   private def train(sc: SparkContext, file: String):MultilayerPerceptronClassificationModel = {
@@ -68,9 +61,10 @@ object NeuralNetworkGen {
     val splits = parsedData.randomSplit(Array(0.7, 0.3), seed = 11L)
     val (training, test) = (splits(0), splits(1))
 
-    // Transform training and test set into Dataframe
-    val trainFrame = session.createDataFrame(training.map(p => Row(p.label, p.features)), schema)
-    val testFrame = session.createDataFrame(test.map(p => Row(p.label, p.features)), schema)
+//    // Transform training and test set into Dataframe
+    import spark.implicits._
+    val trainDS = training toDF
+    val testDS = test toDF
 
     // NN
     // specify layers for the neural network:
@@ -85,10 +79,10 @@ object NeuralNetworkGen {
       .setMaxIter(100)
 
     // train the model
-    val model = trainer.fit(trainFrame)
+    val model = trainer.fit(trainDS)
 
     // compute accuracy on the test set
-    val result = model.transform(testFrame)
+    val result = model.transform(testDS)
     val predictionAndLabels = result.select("prediction", "label")
     val evaluator = new MulticlassClassificationEvaluator()
       .setMetricName("accuracy")
