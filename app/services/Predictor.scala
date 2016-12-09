@@ -9,6 +9,8 @@ import java.util.Date
 import scala.collection.immutable.HashMap
 import scala.util.Random
 import models._
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.rdd.RDD
 
 /**
   * Created by vincentliu on 05/12/2016.
@@ -117,6 +119,11 @@ object Predictor {
       pokestopDistance, pokestopIn100m, pokestopIn250m, pokestopIn500m, pokestopIn1000m, pokestopIn2500m, pokestopIn5000m // 7
     ) // 41
   }
+
+  def parseData(data: RDD[Array[Double]], colNums: Int): RDD[LabeledPoint] = for{
+    vals <- data
+  } yield LabeledPoint(vals(colNums), Vectors.dense(vals.slice(0, colNums)))
+
 
   def getCoordinate(address: Address): Coordinate = {
     val addr = address.street.replace(' ', '+') + ",+" + address.city + ",+" +
