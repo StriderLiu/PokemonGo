@@ -12,7 +12,7 @@ By : Wenbo Liu, Shuxian Wu
      
 You can find our presentation on Prezi.com at the link:
 
-http://prezi.com/4bapseyrrq5c/?utm_campaign=share&utm_medium=copy&rc=ex0share
+http://prezi.com/rzgxbe7i7xoh/?utm_campaign=share&utm_medium=copy&rc=ex0share
 
 # Data Source
 Predict'em All from Kaggle: https://www.kaggle.com/semioniy/predictemall
