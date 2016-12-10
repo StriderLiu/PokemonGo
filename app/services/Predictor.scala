@@ -47,11 +47,7 @@ object Predictor {
       case 2 => "Very Rare"
     }
   }
-//    model.predict(input).toInt match {
-//      case 0 => "Common"
-//      case 1 => "Rare"
-//      case 2 => "Very Rare"
-//    }
+
 
   private def collectInput(address: Address): Vector = {
     val coord = getCoordinate(address)
@@ -119,12 +115,12 @@ object Predictor {
       pokestopDistance, pokestopIn100m, pokestopIn250m, pokestopIn500m, pokestopIn1000m, pokestopIn2500m, pokestopIn5000m // 7
     ) // 41
   }
-
+  // transform to LabeledPoint, using org.apache.spark.mllib.linalg.Vectors. This parsedData is for test purpose
   def parseData(data: RDD[Array[Double]], colNums: Int): RDD[LabeledPoint] = for{
     vals <- data
   } yield LabeledPoint(vals(colNums), Vectors.dense(vals.slice(0, colNums)))
 
-
+// generate lat and lng from google map API with user input from web page
   def getCoordinate(address: Address): Coordinate = {
     val addr = address.street.replace(' ', '+') + ",+" + address.city + ",+" +
       address.state + "+" + address.zipcode  + ",+" + address.country
@@ -134,6 +130,7 @@ object Predictor {
     Coordinate((coord \ "lat").as[Double], (coord \ "lng").as[Double])
   }
 
+  // use current time as appeared time. We are doing classification on present time only in this demo
   private def getCurTime = Calendar.getInstance.getTime
 
   private def getTerrainType: Double = (new Random()).nextInt(17).toDouble
@@ -163,6 +160,7 @@ object Predictor {
     map(cityName).toDouble
   }
 
+  // based on the coordinate generated from google map as input to find the current weather from Dark Sky
   def getWeatherJson(coord: Coordinate): JsValue = {
     val key = "230d97a0808f8c0bb2c722ea6e9ba251"
     val url = s" https://api.darksky.net/forecast/${key}/${coord.lat},${coord.lng}"
@@ -211,6 +209,7 @@ object Predictor {
 //  private def getSunsetMinutesMidnight(jsValue: JsValue): Int = getSunsetTime(jsValue).getHours * 60 + getSunsetTime(jsValue).getMinutes
 
   //  sources: http://www.datasciencetoolkit.org/developerdocs#coordinates2statistics
+  // get population density
   def getPopDensity(coord: Coordinate): Double = {
     val url = s"http://www.datasciencetoolkit.org/coordinates2statistics/${coord.lat}%2c${coord.lng}?statistics=population_density"
     val jsValue = toJson(url)(0)

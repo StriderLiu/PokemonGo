@@ -11,7 +11,8 @@ import services.Predictor._
 class PredictorSpec extends FlatSpec with Matchers{
 
   behavior of "parsedData"
-  // There are two kind vectors we used in project based on different models we used
+  // There are two kinds of vectors we used in project based on different models we used
+  // Here we test on org.apache.spark.mllib.linalg.Vectors
 
   it should "work for other data" in {
     val sc = SparkContext.getOrCreate(
@@ -30,7 +31,7 @@ class PredictorSpec extends FlatSpec with Matchers{
 
   }
 
-  behavior of "getCoordianate"
+  behavior of "getCoordinate"
 
   it should "work for input like 5th avenue, new york, NY 10011, USA, decisionTree" in {
     val input = "5th avenue, new york, NY 10011, USA, decisionTree"

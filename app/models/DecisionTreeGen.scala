@@ -71,7 +71,6 @@ object DecisionTreeGen {
 
     val testErr = labelAndPreds.filter(r => r._1 != r._2).count().toDouble / test.count()
     println("Test Error = " + testErr)
-    // println("Learned classification tree model:\n" + model.toDebugString)
 
     // Save model
     model.save(sc, "resources/models/DecisionTreeModel")

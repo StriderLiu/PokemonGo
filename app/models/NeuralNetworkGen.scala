@@ -36,6 +36,7 @@ object NeuralNetworkGen {
     }
   }
 
+  // Manually define predict function. There is no official "predict" for neural network.
   def predict(sc: SparkContext, model: MultilayerPerceptronClassificationModel,
                       input: org.apache.spark.mllib.linalg.Vector): Double = {
 
@@ -60,15 +61,15 @@ object NeuralNetworkGen {
     val splits = parsedData.randomSplit(Array(0.7, 0.3), seed = 11L)
     val (training, test) = (splits(0), splits(1))
 
-//    // Transform training and test set into Dataframe
+    // Transform training and test set into Dataframe
     import spark.implicits._
     val trainDS = training toDF
     val testDS = test toDF
 
     // NN
     // specify layers for the neural network:
-    // input layer of size 196 (features), two intermediate of size 50 and 50
-    // and output of size 15 (classes)
+    // input layer of size 41 (features), two intermediate of size 20
+    // and output of size 3 (classes)
     val layers = Array[Int](41, 20, 3)
     // create the trainer and set its parameters
     val trainer = new MultilayerPerceptronClassifier()

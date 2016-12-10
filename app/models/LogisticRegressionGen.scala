@@ -17,7 +17,6 @@ object LogisticRegressionGen {
   def getModel(sc: SparkContext, file: String): LogisticRegressionModel = {
     // if the model already exists, then retrieve the model from directory
     // if the model does not exist, then train the data set and get a model
-//    val modelOption = Option(LogisticRegressionModel.load(sc, "target/tmp/LogisticRegressionModel"))
     val modelOption: Option[LogisticRegressionModel] = {
       try {
         Some(LogisticRegressionModel.load(sc, "resources/models/LogisticRegressionModel"))
