@@ -57,7 +57,7 @@ Logistic Regression, Neural Network and Decision Tree
 We spend a lot time on data mining to understand how each variable works toward poké monster spawning. Challenges we find are: 
 - The dataset is generated from dump files which are created from Pokémon Go players' reports. It is clean but not "clean" to use. At least half of 208 variables (not include merged data but original from Kaggle) are vague on usages. 
 - With 151 classifiers (151 monsters), it is hard to build a high accurate classification model (given only 300k instances).
-- Only few of our variables were generated from APIs; most of them were generated on user bases so that they might not be accurate.
+- Only few of our variables were generated from APIs; most of them were generated on players' personal opnions so that data might not be accurate.
 
 On technology level, we agreed to use Scala, Spark and Play Framework. Problems we faced: 
 - In MLlib, Neural Network is implemented by MultilayerPerceptronClassifier in org.apache.spark.ml package which is different from the way other ML algorithms are implemented (in org.apache.spark.mllib package). Therefore, it is a little bit tricky to provide a uniform service APIs for these algorithms. We provide a way to achieve this (see /services/Predictor.scala and /models/NeuralNetworkGen.scala).
