@@ -16,7 +16,7 @@ You can find our presentation on [Prezi.com](http://prezi.com/rzgxbe7i7xoh/?utm_
 
 The Dataset we worked on is very new, which is only around 2 months old. There are few references we can use. We would like to be one of a few pioneers to explore Pokémon data. And hope our project can be a good resource for others. 
      
-To speed up the application, we save the ML models in the /resources/models directory and each time a user requests for a prediction, the saved model will be applied.
+To speed up the application, we save the ML models in the /resources/models directory and each time a user requests for a prediction, the stored model will be applied.
 
 
 ## Algorithms and Accuracy
@@ -54,7 +54,8 @@ Logistic Regression, Neural Network and Decision Tree
 
 ## Challenges:
 
-We spend a lot time on data mining to understand how each variable works toward poké monster spawning. Challenges we find are: 
+Due to the complex structure of the dataset, we spent a lot time on data mining to understand how each variable works toward poké monster spawning. Spark and RDD do run very fast. Since we have learned a lot about how to gain a better pre-insight of the dataset, we try to extend the full potential of Spark. 
+Challenges we find are: 
 - The dataset is generated from dump files which are created from Pokémon Go players' reports. It is clean but not "clean" to use. At least half of 208 variables (not include merged data but original from Kaggle) are vague on usages. 
 - With 151 classifiers (151 monsters), it is hard to build a high accurate classification model (given only 300k instances).
 - Only few of our variables were generated from APIs; most of them were generated on players' personal opnions so that data might not be accurate.
