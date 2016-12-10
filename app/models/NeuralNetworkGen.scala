@@ -20,8 +20,9 @@ object NeuralNetworkGen {
     .getOrCreate()
 
   def getModel(sc: SparkContext, file: String): MultilayerPerceptronClassificationModel = {
-    // if the model already exists, then retrieve the model from directory
-    // if the model does not exist, then train the data set and get a model
+    // If the model already exists, then retrieve the model from directory.
+    // If the model does not exist, then train the data set and get a model.
+    // Option is a very handy way to deal with this case.
     val modelOption: Option[MultilayerPerceptronClassificationModel] = {
       try {
         Some(MultilayerPerceptronClassificationModel.load("resources/models/NeuralNetworkModel"))
@@ -36,7 +37,8 @@ object NeuralNetworkGen {
     }
   }
 
-  // Manually define predict function. There is no official "predict" for neural network.
+  // Manually define predict function (It's trickier than it seems like!)
+  // There is no official "predict" for neural network.
   def predict(sc: SparkContext, model: MultilayerPerceptronClassificationModel,
                       input: org.apache.spark.mllib.linalg.Vector): Double = {
 
@@ -48,12 +50,15 @@ object NeuralNetworkGen {
     model.transform(inputFrame).select("prediction").first().getDouble(0)
   }
 
+  // Implement of NN in MLlib is quite different than other algorithms.
+  // Vectors and LabeledPoint class comes from ml package (not mllib) and the input format must be Dataset[_].
+  // We tried Dataframe but the Row type in it cannot recognize org.apache.spark.ml.linalg.Vectors.
   private def train(sc: SparkContext, file: String):MultilayerPerceptronClassificationModel = {
     // Data cleansing
     val data = sc.textFile(file)
       .map(_.split(","))
-      .filter(line => line(0) != "latitude")
-      .map(_ map (_.toDouble))
+      .filter(line => line(0) != "latitude") // Get rid of the name row
+      .map(_ map (_.toDouble)) // MLlib only recognize double type
 
     val parsedData = parseData(data, 41)
 

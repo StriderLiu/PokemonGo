@@ -15,8 +15,9 @@ import org.apache.spark.rdd.RDD
 object DecisionTreeGen {
 
   def getModel(sc: SparkContext, file: String): DecisionTreeModel = {
-    // if the model already exists, then retrieve the model from directory
-    // if the model does not exist, then train the data set and get a model
+    // If the model already exists, then retrieve the model from directory.
+    // If the model does not exist, then train the data set and get a model.
+    // Option is a very handy way to deal with this case.
     val modelOption: Option[DecisionTreeModel] = {
       try {
         Some(DecisionTreeModel.load(sc, "resources/models/DecisionTreeModel"))
@@ -35,8 +36,8 @@ object DecisionTreeGen {
     // Data cleansing
     val data = sc.textFile(file)
       .map(_.split(","))
-      .filter(line => line(0) != "latitude")
-      .map(_ map (_.toDouble))
+      .filter(line => line(0) != "latitude") // Get rid of the name row
+      .map(_ map (_.toDouble)) // MLlib only recognize double type
 
     val parsedData = parseData(data, 41)
 
@@ -53,7 +54,7 @@ object DecisionTreeGen {
     val numClasses = 3
     val categoricalFeaturesInfo = Map[Int, Int]()
     val impurity = "gini"
-    val maxDepth = 15
+    val maxDepth = 15 // 15 is the optimal experimental depth we got
     val maxBins = 32
 
     val model = DecisionTree.trainClassifier(training, numClasses, categoricalFeaturesInfo, impurity, maxDepth, maxBins)

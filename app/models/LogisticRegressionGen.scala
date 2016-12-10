@@ -1,6 +1,5 @@
 package models
 
-//import javax.inject.Singleton
 import org.apache.spark.SparkContext
 import org.apache.spark.mllib.classification.{LogisticRegressionModel, LogisticRegressionWithLBFGS}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
@@ -15,8 +14,9 @@ import org.apache.spark.rdd.RDD
 object LogisticRegressionGen {
 
   def getModel(sc: SparkContext, file: String): LogisticRegressionModel = {
-    // if the model already exists, then retrieve the model from directory
-    // if the model does not exist, then train the data set and get a model
+    // If the model already exists, then retrieve the model from directory.
+    // If the model does not exist, then train the data set and get a model.
+    // Option is a very handy way to deal with this case.
     val modelOption: Option[LogisticRegressionModel] = {
       try {
         Some(LogisticRegressionModel.load(sc, "resources/models/LogisticRegressionModel"))
@@ -35,10 +35,11 @@ object LogisticRegressionGen {
     // Data cleansing
     val data = sc.textFile(file)
       .map(_.split(","))
-      .filter(line => line(0) != "latitude")
-      .map(_ map (_.toDouble))
+      .filter(line => line(0) != "latitude") // Get rid of the name row
+      .map(_ map (_.toDouble)) // MLlib only recognize double type
 
     val parsedData = parseData(data, 41)
+
     // Normalization
     val scaler = new StandardScaler().fit(parsedData map (_.features))
     val normalizedData = parsedData.map(p => LabeledPoint(p.label, scaler.transform(p.features)))

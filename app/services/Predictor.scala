@@ -17,15 +17,20 @@ import org.apache.spark.rdd.RDD
   */
 object Predictor {
 
+  // This method applies the selected ML model (from UI) on user input and data from other data sources (APIs)
+  // to get a prediction based on the real-life scenario.
   def predict(address: Address): String = {
+    // Create a SparkContext object to pass in sub methods for Spark operations
     val sc = SparkContext.getOrCreate(
       new SparkConf()
         .setMaster("local")
         .setAppName("PokemonGo")
     )
 
+    // Collect all the input data to construct a Vector of features as the simulated input instance
     val input = collectInput(address)
 
+    // Retrieve model and apply it on the input data
     val output = address.selectAlgo match {
       case "decisionTree" => {
         val model = DecisionTreeGen.getModel(sc, "resources/poke_43.csv")
@@ -41,6 +46,7 @@ object Predictor {
       }
     }
 
+    // Return the prediction result to the controller
     output match {
       case 0 => "Common"
       case 1 => "Rare"
@@ -48,10 +54,11 @@ object Predictor {
     }
   }
 
-
+  // Collect all the input data
   private def collectInput(address: Address): Vector = {
     val coord = getCoordinate(address)
 
+    // Although deprecated, java Date class is still more handy than its scala counterpart
     val appearedHour = getCurTime.getHours.toDouble
     val appearedMinute = getCurTime.getMinutes.toDouble
     val appearedDayOfWeek = getCurTime.getDay.toDouble
@@ -63,11 +70,15 @@ object Predictor {
       case x if x >= 18 => 2.0
     }
 
+    // Due to data insufficiency, we have to randomly generate the terrain type and the judgement of closing to water or not
     val terrainType = getTerrainType
     val closeToWater = isCloseToWater
+
     val city = getCity(address.city)
 
+    // Get the weather data through Dark Sky API
     val json = getWeatherJson(coord)
+    // Extract target features from the json object
     val continent = getContinent(json)
     val weather = getWeatherType(json)
     val temperature = getTemperature(json)
@@ -82,12 +93,15 @@ object Predictor {
     val sunsetMinute = getSunsetMinute(json)
     val sunsetMinutesMidnight = getSunsetMinutesMidnight(sunsetHour, sunsetMinute)
 
+    // Get the population density data through Data Science Toolkits API
     val popDensity = getPopDensity(coord)
+    // Use the population density to categorize the urban type
     val urban = isUrban(popDensity)
     val suburban = isSubUrban(popDensity)
     val midurban = isMidUrban(popDensity)
     val rural = isRural(popDensity)
 
+    // Due to data insufficiency, we have to simulate the gym distance according to the urban type
     val gymDistance = getGymDistance(urban, suburban, midurban, rural)
     val gymIn100m = hasGymIn100m(gymDistance)
     val gymIn250m = hasGymIn250m(gymDistance)
@@ -95,7 +109,7 @@ object Predictor {
     val gymIn1000m = hasGymIn1000m(gymDistance)
     val gymIn2500m = hasGymIn2500m(gymDistance)
     val gymIn5000m = hasGymIn5000m(gymDistance)
-
+    // Simulate the pokestop distance in the same way
     val pokestopDistance = getPokestopDistance(urban, suburban, midurban, rural)
     val pokestopIn100m = hasPokestopIn100m(pokestopDistance)
     val pokestopIn250m = hasPokestopIn250m(pokestopDistance)
@@ -104,6 +118,9 @@ object Predictor {
     val pokestopIn2500m = hasPokestopIn2500m(pokestopDistance)
     val pokestopIn5000m = hasPokestopIn5000m(pokestopDistance)
 
+    // Summarize all the input data and return it as a Vector
+    // There are total 41 input features should be put in the Vector
+    // The order cannot be changed!
     Vectors.dense(
       coord.lat, coord.lng, // 2
       appearedTimeOfDay, appearedHour, appearedMinute, appearedDayOfWeek, appearedDate, // 5
@@ -115,12 +132,14 @@ object Predictor {
       pokestopDistance, pokestopIn100m, pokestopIn250m, pokestopIn500m, pokestopIn1000m, pokestopIn2500m, pokestopIn5000m // 7
     ) // 41
   }
-  // transform to LabeledPoint, using org.apache.spark.mllib.linalg.Vectors. This parsedData is for test purpose
+
+  // Transform to LabeledPoint, using org.apache.spark.mllib.linalg.Vectors.
+  // This parsedData is for test purpose
   def parseData(data: RDD[Array[Double]], colNums: Int): RDD[LabeledPoint] = for{
     vals <- data
   } yield LabeledPoint(vals(colNums), Vectors.dense(vals.slice(0, colNums)))
 
-// generate lat and lng from google map API with user input from web page
+// Generate lat and lng from google map API with user input from web page
   def getCoordinate(address: Address): Coordinate = {
     val addr = address.street.replace(' ', '+') + ",+" + address.city + ",+" +
       address.state + "+" + address.zipcode  + ",+" + address.country
@@ -130,7 +149,8 @@ object Predictor {
     Coordinate((coord \ "lat").as[Double], (coord \ "lng").as[Double])
   }
 
-  // use current time as appeared time. We are doing classification on present time only in this demo
+  // Use current time as appeared time.
+  // We are doing classification on present time only in this demo
   private def getCurTime = Calendar.getInstance.getTime
 
   private def getTerrainType: Double = (new Random()).nextInt(17).toDouble
@@ -138,6 +158,7 @@ object Predictor {
   private def isCloseToWater: Double = (new Random()).nextInt(2).toDouble
 
   private def getCity(cityName: String): Double = {
+    // There are 98 cities in the data set so we put them in a hash table for quick lookup and type transformation.
     val map = HashMap[String, Int](
       "Adelaide" -> 1, "Amman" -> 2, "Amsterdam" -> 3, "Athens" -> 4, "Auckland" -> 5, "Bahia" -> 6,
       "Bangkok" -> 7, "Belem" -> 8, "Berlin" -> 9, "Bogota" -> 10, "Boise" -> 11, "Bratislava" -> 12,
@@ -160,13 +181,14 @@ object Predictor {
     map(cityName).toDouble
   }
 
-  // based on the coordinate generated from google map as input to find the current weather from Dark Sky
+  // Based on the coordinate generated from google map as input to find the current weather from Dark Sky
   def getWeatherJson(coord: Coordinate): JsValue = {
     val key = "230d97a0808f8c0bb2c722ea6e9ba251"
     val url = s" https://api.darksky.net/forecast/${key}/${coord.lat},${coord.lng}"
     toJson(url)
   }
 
+  // A short utility method requesting for json with given url.
   private def toJson(url: String): JsValue = Json.parse(fromURL(url).mkString)
 
   private def getContinent(jsValue: JsValue): Double = {
@@ -192,6 +214,8 @@ object Predictor {
     map((jsValue \ "currently" \ "summary").as[String].replace(" ","")).toDouble
   }
 
+  // These are basically JSON manipulations.
+  // For maintenance purpose, we define them as independent methods
   private def getPressure(jsValue: JsValue):Double = (jsValue \ "currently" \ "pressure").as[Double]
   private def getTemperature(jsValue: JsValue):Double = (jsValue \ "currently" \ "temperature").as[Double]
   private def getWindSpeed(jsValue: JsValue):Double = (jsValue \ "currently" \ "windSpeed").as[Double]
@@ -204,19 +228,17 @@ object Predictor {
   private def getSunsetHour(jsValue: JsValue): Double = getSunsetTime(jsValue).getHours.toDouble
   private def getSunsetMinute(jsValue: JsValue): Double = getSunsetTime(jsValue).getMinutes.toDouble
   private def getSunriseMinutesMidnight(sunriseHour: Double, sunriseMinute: Double): Double = sunriseHour *60 +sunriseMinute
-//  private def getSunriseMinutesMidnight(jsValue: JsValue):Int = getSunriseTime(jsValue).getHours * 60 + getSunriseTime(jsValue).getMinutes
   private def getSunsetMinutesMidnight(sunsetHour: Double, sunsetMinute:Double): Double = sunsetHour * 60 + sunsetMinute
-//  private def getSunsetMinutesMidnight(jsValue: JsValue): Int = getSunsetTime(jsValue).getHours * 60 + getSunsetTime(jsValue).getMinutes
 
-  //  sources: http://www.datasciencetoolkit.org/developerdocs#coordinates2statistics
-  // get population density
+  // sources: http://www.datasciencetoolkit.org/developerdocs#coordinates2statistics
+  // Get population density
   def getPopDensity(coord: Coordinate): Double = {
     val url = s"http://www.datasciencetoolkit.org/coordinates2statistics/${coord.lat}%2c${coord.lng}?statistics=population_density"
     val jsValue = toJson(url)(0)
     (jsValue \ "statistics" \ "population_density" \ "value").as[Double]
   }
 
-  //  <200 for rural, >=200 and <400 for midUrban, >=400 and <800 for subUrban, >800 for urban
+  // <200 for rural, >=200 and <400 for midUrban, >=400 and <800 for subUrban, >800 for urban
   private def isRural(density: Double): Double = if (density < 200) 1.0 else 0.0
 
   private def isMidUrban(density: Double): Double = density match {
