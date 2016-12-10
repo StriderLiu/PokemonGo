@@ -61,4 +61,4 @@ Due to the complex structure of the dataset, we spent a lot time on data mining 
 
 On technology level, we agreed to use Scala, Spark and Play Framework. Problems we faced: 
 - In MLlib, Neural Network is implemented by MultilayerPerceptronClassifier in org.apache.spark.ml package which is different from the way other ML algorithms are implemented (in org.apache.spark.mllib package). Therefore, it is a little bit tricky to provide a uniform service APIs for these algorithms. We provide a way to achieve this (see /services/Predictor.scala and /models/NeuralNetworkGen.scala).
-- We tried to deploy our application on AWS but we met some configuration isses. Due to the time limit, we keep the application local.
+- We tried to deploy our application on AWS but we met some configuration isses. Boxfuse cannot start the EC2 instance because a java.lang.ClassCastException (org.slf4j.impl.Log4jLoggerFactory cannot be cast to ch.qos.logback.classic.LoggerContext). And exporting war file  is not supported by play 2.x so we cannot upload the application to AWS as .war file.
