@@ -54,12 +54,11 @@ Logistic Regression, Neural Network and Decision Tree
 
 ## Challenges:
 
-Due to the complex structure of the dataset, we spent a lot time on data mining to understand how each variable works toward poké monster spawning. Spark and RDD do run very fast. Since we have learned a lot about how to gain a better pre-insight of the dataset, we try to extend the full potential of Spark. 
-Challenges we find are: 
+Due to the complex structure of the dataset, we spent a lot time on data mining to understand how each variable works toward poké monster spawning. Spark and RDDs do run very fast. Since we have learned a lot about how to gain a better pre-insight of the dataset, we try to extend the full potential of Spark. Challenges we find are: 
 - The dataset is generated from dump files which are created from Pokémon Go players' reports. It is clean but not "clean" to use. At least half of 208 variables (not include merged data but original from Kaggle) are vague on usages. 
 - With 151 classifiers (151 monsters), it is hard to build a high accurate classification model (given only 300k instances).
 - Only few of our variables were generated from APIs; most of them were generated on players' personal opnions so that data might not be accurate.
 
 On technology level, we agreed to use Scala, Spark and Play Framework. Problems we faced: 
 - In MLlib, Neural Network is implemented by MultilayerPerceptronClassifier in org.apache.spark.ml package which is different from the way other ML algorithms are implemented (in org.apache.spark.mllib package). Therefore, it is a little bit tricky to provide a uniform service APIs for these algorithms. We provide a way to achieve this (see /services/Predictor.scala and /models/NeuralNetworkGen.scala).
-     
+- We tried to deploy our application on AWS but we met some configuration isses. Due to the time limit, we keep the application local.
