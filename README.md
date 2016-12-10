@@ -1,4 +1,4 @@
-# PokemonGo
+# Pokémon Go Analysis
 
 Brand New Version of PikaPika
 
@@ -25,7 +25,7 @@ Logistic Regression, Neural Network and Decision Tree
 
 - With 3 rarity (common, rare and very rare), accuracy is 89.27% (We are using this option for final delivery.)
      
-- With 15 types, accuracy is around 40%
+- With 15 poke monsters' types, accuracy is around 40%
      
 - With 151 poke monsters, the highest accuracy we got is 22%
 
@@ -39,7 +39,7 @@ Logistic Regression, Neural Network and Decision Tree
 ## Data Source
 
 - [Predict'em All](https://www.kaggle.com/semioniy/predictemall) from Kaggle
-- [PokemonGO](https://www.kaggle.com/abcsds/pokemongo) from Kaggle
+- [PokémonGO](https://www.kaggle.com/abcsds/pokemongo) from Kaggle
 - Google Map API for [geocoding](https://developers.google.com/maps/documentation/geocoding/intro) 
 - Weather API Powered by [Dark Sky](https://darksky.net/poweredby/)
 - Data Science Toolkits [Coordinates to Statistics](http://www.datasciencetoolkit.org/developerdocs#coordinates2statistics)
@@ -54,7 +54,7 @@ Logistic Regression, Neural Network and Decision Tree
 
 ## Challenges:
 
-We spend a lot time on data mining to understand how each variable works toward poke monster spawning. Challenges we find are: 
+We spend a lot time on data mining to understand how each variable works toward poké monster spawning. Challenges we find are: 
 - The dataset is generated from dump files which are created from Pokémon Go players' reports. It is clean but not "clean" to use. At least half of 208 variables (not include merged data but original from Kaggle) are vague on usages. 
 - With 151 classifiers (151 monsters), it is hard to build a high accurate classification model (given only 300k instances).
 - Only few of our variables were generated from APIs; most of them were generated on user bases so that they might not be accurate.
